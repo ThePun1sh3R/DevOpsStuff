@@ -1,0 +1,9 @@
+---
+- hosts: appserver
+  roles:
+    - myproject
+    - createuser
+    - install-docker
+    - nginx
+  vars_files:
+    - roles/createuser/vars/vars.yml 

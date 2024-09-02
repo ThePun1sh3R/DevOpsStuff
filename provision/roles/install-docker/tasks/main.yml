@@ -1,0 +1,54 @@
+---
+- name: "Debug message: Checking distribution"
+  debug:
+    msg: "Detected distribution: {{ ansible_distribution }}"
+
+- name: Update apt package cache and install dependencies
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gnupg-agent
+    - software-properties-common
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Add Docker GPG key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Add Docker repository
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+    state: present
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Install Docker
+  apt:
+    name: docker  # Corrected the package name to docker-ce
+    state: present
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Ensure Docker service is started and enabled
+  service:
+    name: docker
+    state: started
+    enabled: yes
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Create a Docker container
+  docker_container:
+    name: my_container
+    image: nginx:latest
+    state: started
+    restart_policy: always
+    ports:
+      - "80:80"
+    volumes:
+      - "/path/to/host/directory:/container/mount/point"
+  when: ansible_distribution == 'Ubuntu'
+
